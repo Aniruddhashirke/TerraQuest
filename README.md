@@ -49,7 +49,7 @@
 ### Main user journey
 
 ```mermaid
-flowchart LR
+flowchart TD
     A([Open app]) --> B{Signed in<br/>or guest?}
     B -- No --> L[Login<br/>Google / Phone OTP / Guest]
     L --> H
@@ -106,7 +106,7 @@ flowchart TD
     C -- Yes --> D["POST /api/identify<br/>(serverless, key stays on server)"]
     D --> E[Vision LLM: common + scientific name]
     E --> F{Plant and PlantNet key set?}
-    F -- Yes --> G[Pl@ntNet second opinion] --> H
+    F -- Yes --> G["Pl@ntNet second opinion"] --> H
     F -- No --> H
     C -- No --> O[On-device CLIP matcher]
     D -. error .-> O
