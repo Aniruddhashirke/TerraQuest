@@ -1,4 +1,4 @@
-# 🌿 NatureLens AI
+# 🌿 TerraQuest
 
 **A mobile-first outdoor companion.** Go for a walk, scan the plants, birds and insects you meet, and watch your journal, map and stats fill up. It's a PWA that installs on your phone and works offline.
 
