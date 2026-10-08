@@ -1,4 +1,14 @@
-node_modules
-dist
+node_modules/
+dist/
+.vercel/
+
+# Local environment variables and secrets
 .env
-.env.local
+.env.*
+!.env.example
+
+# Local logs and OS/editor files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
