@@ -48,76 +48,160 @@
 
 ### Main user journey
 
-```mermaid
-flowchart TD
-    A([Open app]) --> B{Signed in<br/>or guest?}
-    B -- No --> L[Login<br/>Google / Phone OTP / Guest]
-    L --> H
-    B -- Yes --> H[Home]
-    H --> S[Start exploring]
-    S --> T[Track walk<br/>GPS + timer]
-    T --> C[Scan with camera]
-    C --> I[Identify species]
-    I --> V[Save discovery<br/>photo + GPS + time]
-    V --> M[Map pins and route]
-    M --> N[Next mission]
-    N --> D[Complete mission]
-    D --> T
-    T --> E[Stop walk]
-    E --> R[Journal + report]
-    R --> H
+```
+Open app
+   |
+   v
+Signed in or guest?
+   | Yes                         | No
+   v                             v
+ Home                       Login (Google / Phone OTP / Guest)
+   ^                             |
+   +-----------------------------+
+   |
+   v
+Start exploring
+   |
+   v
+Track walk (GPS + timer)
+   |
+   v
+Scan with camera --> Identify species --> Save discovery (photo + GPS + time)
+                                           |
+                                           v
+                                  Map pins and route
+                                           |
+                                           v
+                                    Next mission
+                                           |
+                                           v
+                                  Complete mission
+                                           |
+                                           +------> Track walk
+
+Track walk --> Stop walk --> Journal + report --> Home
 ```
 
 ### Walk session state machine
 
-```mermaid
-stateDiagram-v2
-    [*] --> IDLE
-    IDLE --> ACTIVE: Start
-    ACTIVE --> PAUSED: Pause
-    PAUSED --> ACTIVE: Resume
-    ACTIVE --> COMPLETED: Stop
-    PAUSED --> COMPLETED: Stop
-    COMPLETED --> IDLE: Saved to journal
+```
+                 Start
+   +------+ --------------> +--------+
+   | IDLE |                 | ACTIVE |
+   +------+ <-------------- +--------+
+       ^       Saved to          |  ^
+       |       journal           |  | Resume
+       |                         v  |
+       |                     +--------+
+       +---------------------| PAUSED |
+          Stop               +--------+
+          from ACTIVE or PAUSED
+
+ACTIVE -- Pause --> PAUSED
+ACTIVE -- Stop ---> COMPLETED -- Saved to journal --> IDLE
+PAUSED -- Stop ---> COMPLETED
 ```
 
 ### Sign-in flow
 
-```mermaid
-flowchart TD
-    A[Login screen] --> G[Continue with Google]
-    A --> P[Enter phone number]
-    A --> U[Continue as guest]
-    G --> GP{Popup allowed?}
-    GP -- Yes --> OK
-    GP -- No --> GR[Redirect sign-in] --> OK
-    P --> SMS[Firebase sends SMS code<br/>invisible reCAPTCHA]
-    SMS --> OTP[Enter 6-digit code] --> OK
-    OK([Signed in: session saved on device<br/>works offline]) --> HOME[Home]
-    U --> HOME
+```
+                         +----------------+
+                         |  Login screen  |
+                         +----------------+
+                           /      |      \
+                          v       v       v
+                     Google    Phone    Continue as guest
+                       |         |              |
+                       v         v              |
+                 Popup allowed? Firebase sends SMS code
+                  /         \   (invisible reCAPTCHA) |
+                Yes          No                      v
+                 |      Redirect sign-in       Enter 6-digit code
+                  \          /                       /
+                   v        v                       v
+                    Signed-in session saved on device
+                         (works offline)
+                               |
+                               v
+                              Home
 ```
 
 ### Species identification flow
 
-```mermaid
-flowchart TD
-    A[Photo captured] --> B[Compress image]
-    B --> C{Online?}
-    C -- Yes --> D["POST /api/identify<br/>(serverless, key stays on server)"]
-    D --> E[Vision LLM: common + scientific name]
-    E --> F{Plant and PlantNet key set?}
-    F -- Yes --> G["Pl@ntNet second opinion"] --> H
-    F -- No --> H
-    C -- No --> O[On-device CLIP matcher]
-    D -. error .-> O
-    O --> H[Identification card<br/>confidence + safety notes]
-    H --> I[Save to journal]
-    H --> W[Optional: Wikipedia summary]
+```
+Photo captured --> Compress image --> Online?
+                                  | Yes
+                                  v
+                    POST /api/identify (serverless)
+                    API key stays on the server
+                                  |
+                                  v
+                 Vision AI (common + scientific name)
+                                  |
+                       PlantNet key set?
+                         /           \
+                       Yes            No
+                        |              |
+                        v              |
+                 PlantNet second      |
+                    opinion           |
+                         \            /
+                          v          v
+                 Identification card
+                (confidence + safety notes)
+                         |
+                         +------> Save to journal
+                         |
+                         +------> Optional Wikipedia summary
+
+Online? -- No --> On-device CLIP matcher --> Identification card
+API error --------> On-device CLIP matcher
+```
+
+### Context and AI decision flow
+
+```text
+Camera ---------> Vision AI -----+
+                                 |
+Microphone -----> Audio AI ------+   (audio identification is planned)
+                                 |
+GPS ------------> Location -----+----> Context engine
+                                 |             |
+Sensors --------> Activity -----+             v
+                                         AI decision
+                                           /     \
+                                          v       v
+                                   Next mission  AI response
+                                          \       /
+                                           v     v
+                                          User action
 ```
 
 ---
 
 ## Screens
+
+The screenshots below show the main mobile views.
+
+### Home
+
+![NatureLens home screen](docs/screenshots/home.png)
+
+### Explore
+
+![NatureLens explore screen](docs/screenshots/explore.png)
+
+### Scanner
+
+![NatureLens scanner screen](docs/screenshots/scanner.png)
+
+### Map
+
+![NatureLens map screen](docs/screenshots/map.png)
+
+### Journal
+
+![NatureLens journal screen](docs/screenshots/journal.png)
 
 | Tab | Route | What it does |
 | --- | --- | --- |
