@@ -404,4 +404,4 @@ Netlify or any static host works for the front end, but you'll need to port `api
 
 ## License
 
-Add a `LICENSE` file before publishing (MIT is a common choice for open-source projects).
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
